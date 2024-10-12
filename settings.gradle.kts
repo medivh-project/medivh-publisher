@@ -1,0 +1,2 @@
+rootProject.name = "medivh-publisher"
+
