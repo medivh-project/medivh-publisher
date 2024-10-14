@@ -11,15 +11,12 @@ repositories {
     mavenCentral()
 }
 
+
+
 dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202308070828-r")
     testImplementation(kotlin("test"))
-}
-
-val ktor_version = "2.3.4"  // 确保使用最新版本
-
-dependencies {
-    implementation("io.ktor:ktor-client-core:$ktor_version")  // 核心库
-    implementation("io.ktor:ktor-client-cio:$ktor_version")   // CIO 引擎
 }
 
 tasks.test {
