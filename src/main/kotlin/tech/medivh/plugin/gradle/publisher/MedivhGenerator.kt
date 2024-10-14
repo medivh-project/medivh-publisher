@@ -1,9 +1,9 @@
 package tech.medivh.plugin.gradle.publisher
 
+import org.eclipse.jgit.api.Git
 import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.internal.impldep.org.eclipse.jgit.api.Git
 import tech.medivh.plugin.gradle.publisher.setting.Developer
 import tech.medivh.plugin.gradle.publisher.setting.Scm
 
@@ -58,7 +58,8 @@ class MedivhGenerator(private val project: Project) {
 
 
     private fun detectScm(): Scm {
-        val remoteUrl = git.repository.config.getString("remote", "origin", "url")
+        val config = git.repository.config
+        val remoteUrl = config.getSubsections("remote").find { config.getString("remote", it, "url") != null }
         check(remoteUrl != null) {
             "can't detect scm info, please specify"
         }

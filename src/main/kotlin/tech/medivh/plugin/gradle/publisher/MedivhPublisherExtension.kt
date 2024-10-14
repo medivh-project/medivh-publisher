@@ -4,7 +4,7 @@ package tech.medivh.plugin.gradle.publisher
 /**
  * @author gxz gongxuanzhangmelt@gmail.com
  **/
-class MedivhPublisherExtension {
+open class MedivhPublisherExtension {
     
     var dir: String = ""
 
