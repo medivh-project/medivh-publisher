@@ -16,7 +16,6 @@ import org.gradle.plugins.signing.SigningPlugin
 class MedivhPublisher : Plugin<Project> {
 
     override fun apply(project: Project) {
-        
         project.dependencies.add("implementation", "com.squareup.okhttp3:okhttp:4.12.0")
         project.dependencies.add("implementation", "org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r")
         
@@ -28,6 +27,9 @@ class MedivhPublisher : Plugin<Project> {
 
         
         project.afterEvaluate {
+
+            SonatypeApi.authToken = calcAuthToken(medivhExtension.tokenUsername, medivhExtension.tokenPassword)
+            
             project.extensions.getByType(JavaPluginExtension::class.java).apply {
                 if (medivhExtension.hasJavaDoc) {
                     withJavadocJar()
