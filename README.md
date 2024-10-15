@@ -35,6 +35,12 @@ For security reasons, we store this token in Gradle’s local configuration file
 sonatypeUsername=username
 sonatypePassword=password
 ```
+Alternatively, provide an environment variable.
+```shell
+sonatypeUsername=username
+sonatypePassword=password
+```
+
 
 > 💯You have completed all the Sonatype configurations.
 
