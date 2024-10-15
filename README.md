@@ -49,8 +49,38 @@ sonatypePassword=password
 <details>
   <summary>🔑 GPG Configuration Guide</summary>
 
-1. You need to refer to the documentation to download the appropriate GnuPG for your system. [link](https://gnupg.org/download/index.html)
+1. You need to refer to the documentation to download the appropriate GnuPG for your system. [download](https://gnupg.org/download/index.html)
 2. Open the software you just installed, create a key pair, and upload the public key.
+3. open your terminal and execute the following command:
+
+```shell
+gpg -K
+````
+You will see the following output:
+```text
+---------------------------------------
+sec   rsa4096 2023-11-07 [SC] [valid till：2027-11-07]
+      ⚠️[your-sec-key] 
+uid           your-name <your-email>
+ssb   rsa4096 2023-11-07 [E] [valid till：2027-11-07]
+````
+
+4. Next execute the following command:
+```shell
+gpg --keyring secring.gpg --export-secret-keys > ~/.gnupg/secring.gpg
+````
+
+Now we need three pieces of information:
+- `signing.keyId` - This is the `last eight bits` of `your-sec-key` that you see when you execute `gpg -K` in step 3.
+- `signing.password` - This is the password you entered to protect your private key when you generated it in step 2.
+- `signing.secretKeyRingFile` - This is the absolute path that you execute `gpg --keyring secring.gpg --export-secret-keys > ~/.gnupg/secring.gpg` in step 4.
+
+5. finally, store the above information in the Gradle configuration file (usually located at ~/.gradle/gradle.properties). or provide an environment variable.
+```properties
+signing.keyId=24875D73
+signing.password=secret
+signing.secretKeyRingFile=/Users/me/.gnupg/secring.gpg
+```
 </details>
 
 
