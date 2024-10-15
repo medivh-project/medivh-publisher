@@ -1,4 +1,4 @@
-package tech.medivh.plugin.gradle.publisher
+package tech.medivh.plugin.gradle.publisher.api
 
 import java.io.BufferedOutputStream
 import java.io.File
@@ -22,13 +22,17 @@ fun calcAuthToken(tokenUsername: String?, tokenPassword: String?): String {
     return Base64.getEncoder().encodeToString("$tokenUsername:$tokenPassword".toByteArray())
 }
 
-fun zipFolder(folder: File, name: String) {
+fun zipFolder(folder: File, targetFile: File): File {
     require(folder.exists()) { "${folder.absolutePath} does not exist" }
     require(folder.isDirectory) { "${folder.absolutePath} is not a directory" }
 
-    val zipFile = File(folder.parentFile, name)
-
-    ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile))).use { zipOut ->
+    if (!targetFile.parentFile.exists()) {
+        targetFile.parentFile.mkdirs()
+    }
+    if (targetFile.exists()) {
+        targetFile.delete()
+    }
+    ZipOutputStream(BufferedOutputStream(FileOutputStream(targetFile))).use { zipOut ->
         folder.walkTopDown().forEach { file ->
             if (file != folder) {
                 val relativePath = file.relativeTo(folder).path
@@ -44,7 +48,9 @@ fun zipFolder(folder: File, name: String) {
             }
         }
     }
+    return targetFile
 }
+
 
 
 

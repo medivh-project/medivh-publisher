@@ -15,6 +15,8 @@ import tech.medivh.plugin.gradle.publisher.setting.Scm
  **/
 class MedivhGenerator(private val project: Project) {
 
+    private val extension = project.extensions.getByType(MedivhPublisherExtension::class.java)
+
     private val git: Git by lazy {
         val gitDir = project.rootDir.resolve(".git")
         check(gitDir.exists() && gitDir.isDirectory) {
@@ -26,9 +28,9 @@ class MedivhGenerator(private val project: Project) {
     fun generateMavenPublication(publication: MavenPublication) {
         publication.apply {
             from(project.components.getByName("java"))
-            groupId = project.group.toString()
-            artifactId = project.name
-            version = project.version.toString()
+            groupId = extension.groupId
+            artifactId = extension.artifactId
+            version = extension.version
             pom { pom ->
                 generatePom(pom, this)
             }
@@ -36,9 +38,6 @@ class MedivhGenerator(private val project: Project) {
     }
 
     private fun generatePom(pom: MavenPom, publication: MavenPublication) {
-        pom.name.set("${publication.groupId}:${publication.artifactId}")
-        pom.description.set("a project for ${publication.artifactId}")
-        pom.url.set("https://github.com")
         pom.licenses { licenses ->
             //  todo detect license
             licenses.license {
@@ -51,19 +50,23 @@ class MedivhGenerator(private val project: Project) {
                 detectDeveloper().setting(setDev)
             }
         }
+        val remoteUrl = detectRemoteUrl()
         pom.scm {
-            detectScm().setting(it)
+            Scm(remoteUrl).setting(it)
         }
+        pom.name.set("${publication.groupId}:${publication.artifactId}")
+        pom.description.set("a project for ${publication.artifactId}")
+        pom.url.set(remoteUrl)
     }
 
 
-    private fun detectScm(): Scm {
+    private fun detectRemoteUrl(): String {
         val config = git.repository.config
         val remoteUrl = config.getSubsections("remote").find { config.getString("remote", it, "url") != null }
         check(remoteUrl != null) {
-            "can't detect scm info, please specify"
+            "can't detect remoteUrl info, please specify remote url"
         }
-        return Scm(remoteUrl)
+        return remoteUrl
     }
 
     private fun detectDeveloper(): Developer {

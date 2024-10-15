@@ -8,6 +8,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
+import tech.medivh.plugin.gradle.publisher.api.SonatypeApi
 
 
 /**
@@ -16,31 +17,45 @@ import org.gradle.plugins.signing.SigningPlugin
 class MedivhPublisher : Plugin<Project> {
 
     override fun apply(project: Project) {
-        project.dependencies.add("implementation", "com.squareup.okhttp3:okhttp:4.12.0")
-        project.dependencies.add("implementation", "org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r")
-        
-        val medivhExtension = project.extensions.create("medivhPublisher", MedivhPublisherExtension::class.java)
+        project.run {
+            dependencies.add("implementation", "com.squareup.okhttp3:okhttp:4.12.0")
+            dependencies.add("implementation", "org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r")
+            dependencies.add("implementation", "com.alibaba.fastjson2:fastjson2:2.0.53")
+            val medivhExtension = extensions.create("medivhPublisher", MedivhPublisherExtension::class.java, project)
 
-        generateMavenPublishIfNecessary(project, medivhExtension)
+            afterEvaluate {
+                SonatypeApi.init(medivhExtension)
+                generateMavenPublishIfNecessary(this, medivhExtension)
+                generateSigningIfNecessary(this)
 
-        generateSigningIfNecessary(project)
-
-        
-        project.afterEvaluate {
-
-            SonatypeApi.authToken = calcAuthToken(medivhExtension.tokenUsername, medivhExtension.tokenPassword)
-            
-            project.extensions.getByType(JavaPluginExtension::class.java).apply {
-                if (medivhExtension.hasJavaDoc) {
-                    withJavadocJar()
+                extensions.getByType(JavaPluginExtension::class.java).apply {
+                    if (medivhExtension.hasJavaDoc) {
+                        withJavadocJar()
+                    }
+                    if (medivhExtension.hasSources) {
+                        withSourcesJar()
+                    }
                 }
-                if (medivhExtension.hasSources) {
-                    withSourcesJar()
+                tasks.register("cleanBuildMavenRepo") {
+                    it.doLast {
+                        project.file(medivhExtension.buildMavenRepo).deleteRecursively()
+                    }
+                }
+
+                tasks.register("uploadBuildToSonatype", UploadSonatypeTask::class.java, medivhExtension).configure {
+                    it.dependsOn("cleanBuildMavenRepo")
+                    project.extensions.getByType(PublishingExtension::class.java).repositories.forEach { repository ->
+                        val repositoryName = repository.name.replaceFirstChar { name ->
+                            if (name.isLowerCase()) name.titlecase() else name.toString()
+                        }
+                        it.dependsOn("publishAllPublicationsTo${repositoryName}Repository")
+                    }
+                }
+                tasks.register("publishDeployment", PublishDeploymentTask::class.java).configure {
+                    it.dependsOn("uploadBuildToSonatype")
                 }
             }
-            project.tasks.create("publishToSonatype", PublishToSonatypeTask::class.java, medivhExtension)
         }
-
     }
 
     private fun generateSigningIfNecessary(project: Project) {
@@ -67,7 +82,7 @@ class MedivhPublisher : Plugin<Project> {
 
             publishing.repositories.maven { maven ->
                 maven.name = "sonatype"
-                maven.url = project.uri(project.layout.buildDirectory.dir("medivhRepo"))
+                maven.url = project.uri(medivhExtension.buildMavenRepo)
             }
 
             publishing.publications.create("medivhMavenJava", MavenPublication::class.java) { publication ->
