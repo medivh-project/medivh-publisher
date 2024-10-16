@@ -55,3 +55,8 @@ plugins {
 你将在 https://central.sonatype.com/publishing/deployments[Sonatype] 中看到以下输出:
 
 image::./images/publish-complete.png[]
+
+== 详细文档
+更高级的配置和原理请参见link:./zh/document.adoc[详细文档]
+
+

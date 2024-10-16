@@ -57,3 +57,7 @@ Open your terminal and execute:
 You will see the following output in https://central.sonatype.com/publishing/deployments[Sonatype]:
 
 image::doc/images/publish-complete.png[]
+
+
+== Document
+For more advanced configurations and principles, see the link:./doc/en/document.adoc[Document]
