@@ -1,0 +1,33 @@
+= Sonatype Configuration Guide 📄
+
+1. Register an account on https://central.sonatype.com/ (if you don’t have one).
+
+2. Create a namespace on https://central.sonatype.com/publishing/namespaces. The purpose of this step is to prove that you own a domain name that can be published (which will eventually be the `groupId` of the published Maven repository). You can directly use GitHub's domain name, like: `io.github.your-username`.
+
+3. Create a token on https://central.sonatype.com/account. This token will be used to authenticate the user when uploading the artifacts to the Maven Central Repository. You will get something like this:
+
+[source,xml]
+----
+<server>
+  <username>username</username>
+  <password>password</password>
+</server>
+----
+
+Remember the `username` and `password`. For security reasons, we store this token in Gradle’s local configuration file (usually located at `~/.gradle/gradle.properties`).
+
+[source,properties]
+----
+sonatypeUsername=username
+sonatypePassword=password
+----
+
+Alternatively, provide an environment variable:
+
+[source,shell]
+----
+sonatypeUsername=username
+sonatypePassword=password
+----
+
+*💯 You have completed all the Sonatype configurations.*

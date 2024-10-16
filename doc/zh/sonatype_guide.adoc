@@ -1,0 +1,35 @@
+= Sonatype 配置指南 📄
+
+
+1. 在 https://central.sonatype.com/ 注册一个账户（如果你还没有）。
+
+
+2. 在 https://central.sonatype.com/publishing/namespaces 创建一个命名空间。这一步的目的是证明你拥有一个可以发布的域名（最终将是发布的 Maven 仓库的 `groupId`）。你可以直接使用 GitHub 的域名，例如：`io.github.your-username`。
+
+
+3. 在 https://central.sonatype.com/account 创建一个令牌。此令牌将用于在将构件上传到 Maven 中央仓库时对用户进行身份验证。你将得到类似于以下内容：
+
+[source,xml]
+----
+<server>
+  <username>username</username>
+  <password>password</password>
+</server>
+----
+
+记住 `username` 和 `password`。出于安全原因，我们将此令牌存储在 Gradle 的本地配置文件中（通常位于 `~/.gradle/gradle.properties`）。
+[source,properties]
+----
+sonatypeUsername=username
+sonatypePassword=password
+----
+
+或者你可以提供一个环境变量：
+
+[source,shell]
+----
+sonatypeUsername=username
+sonatypePassword=password
+----
+
+*💯 你已经完成sonatype的所有配置.*

@@ -1,0 +1,57 @@
+= Medivh-Publish
+
+++++
+<p align="center"> <img src="https://github.com/user-attachments/assets/697cf38e-83aa-4e88-8280-2bee79a83c2f" align="center" alt="GitHub Readme Stats" width="200" /> <h2 align="center"></h2> </p>
+++++
+
+语言:  中文文档 | link:../README.adoc[English]
+
+> Medivh-publisher 是一个用于将 Gradle 项目发布到 Maven 中央仓库的 Gradle 插件.它可以让你完全不需要参考官方文档.
+
+== 必要条件
+
+这里有两个私有配置，每个发布者都必须拥有。
+
+* *Sonatype Token* 📄 这是一个用户名和密码，用于在将构件上传到 Maven 中央仓库时对用户进行身份验证。
+* *GPG* 🔑 这是一个私钥，用于对上传到 Maven 中央仓库的构件进行签名。
+
+link:./en/sonatype_guide.adoc[Sonatype 账号指南] | link:./en/gpg_guide.adoc[GPG 配置指南]
+
+== 快速开始
+
+⚠️ 请在继续之前，请检查必要条件。
+
+----
+请保证你在继续之前已经准备好了必要的配置。这意味着你可以从 gradle 中获取到五个属性。
+- signing.keyId
+- signing.password
+- signing.secretKeyRingFile
+- sonatypeUsername
+- sonatypePassword
+----
+
+=== 使用 
+在你的 ``build.gradle.kts`` 文件中，添加以下代码:
+
+[source,kotlin]
+----
+plugins {
+    id("tech.medivh.plugin.publisher") version "0.0.1"
+    // other plugin ...
+}
+----
+
+😺 是的，没错。除了 ``tech.medivh.plugin.publisher``，你不需要包含任何其他插件。
+
+打开你的终端并执行:
+
+[source,shell]
+----
+./gradlew publishDeployment
+----
+
+😺 没错，你甚至不需要任何配置。
+
+你将在 https://central.sonatype.com/publishing/deployments[Sonatype] 中看到以下输出:
+
+image::./images/publish-complete.png[]

@@ -1,0 +1,58 @@
+= GPG 配置指南 🔑
+
+== 1. 安装 GnuPG 
+
+根据文档下载适合你操作系统的软件. https://gnupg.org/download/index.html[Download link]
+
+== 2. 生成 GPG 密钥对
+打开刚刚安装的软件，创建密钥对，并上传公钥。
+
+== 3. 获取密钥信息
+
+打开终端并执行以下命令:
+
+[source,shell]
+----
+gpg -K
+----
+
+你将看到以下输出:
+
+[source,text]
+----------------------------------------
+sec   rsa4096 2023-11-07 [SC] [有效期至：2027-11-07]
+      ⚠️[你的密钥信息] 
+uid           your-name <your-email>
+ssb   rsa4096 2023-11-07 [E] [有效期至：2027-11-07]
+----------------------------------------
+
+== 4. 导出密钥
+
+接下来，执行以下命令:
+
+[source,shell]
+----
+gpg --keyring secring.gpg --export-secret-keys > ~/.gnupg/secring.gpg
+----
+
+现在，你需要三个信息:
+
+* `signing.keyId` 
+这是你在第3步执行 `gpg -K` 时看到的 `你的密钥信息` 的 `最后八位`。
+* `signing.password` 在第2步生成密钥对的时候输入的为了保护密钥的密码.
+* `signing.secretKeyRingFile` 第4步导出密钥的时候文件绝对路径.
+
+
+== 5. 设置配置
+
+最后，将上述信息存储在 Gradle 配置文件中（通常位于 `~/.gradle/gradle.properties`），或将其作为环境变量提供:
+
+[source,properties]
+----
+signing.keyId=24875D73
+signing.password=secret
+signing.secretKeyRingFile=/Users/me/.gnupg/secring.gpg
+----
+
+*💯 你已经完成了所有的 gpg 配置*
+
