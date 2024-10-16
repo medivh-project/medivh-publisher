@@ -15,7 +15,7 @@
 * *Sonatype Token* 📄 这是一个用户名和密码，用于在将构件上传到 Maven 中央仓库时对用户进行身份验证。
 * *GPG* 🔑 这是一个私钥，用于对上传到 Maven 中央仓库的构件进行签名。
 
-link:./en/sonatype_guide.adoc[Sonatype 账号指南] | link:./en/gpg_guide.adoc[GPG 配置指南]
+link:./zh/sonatype_guide.adoc[Sonatype 账号指南] | link:./zh/gpg_guide.adoc[GPG 配置指南]
 
 == 快速开始
 
