@@ -18,7 +18,110 @@ Medivh-Publish封装了Gradle官方的link:https://docs.gradle.org/current/userg
 
 如果你没有引入这个插件，Medivh-publisher 会自动帮你引入，你不需要做任何配置。
 
+'''
+
+=== 和 Maven-Publish 的配置关系
+
+如果你已经使用了Maven-Publish插件配置，Medivh-Publish会自动使用你的配置，你不需要做任何额外的配置。
+
+> 如果你对于 Maven-Publish插件配置没有完整填写，Medivh-Publish会帮你填入默认值，并且会在控制台输出警告信息。
+
+
+=== 配置优先级
+
+Medivh-Publish > Maven-Publish > 默认值
+
+所以如果你已经有了Maven-Publish配置，也可以继续使用，Medivh-Publish会自动使用你的配置。
+
+=== image:./../images/maven-icon.svg[] ``Maven-Publish`` 配置 
+
+[source,kotlin]
+----
+publishing {
+    publications {
+        create<MavenPublication>("medivh-api") {
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+            from(components["java"])
+            pom{
+                name = "medivh-api"
+                description = "medivh plugin api"
+                url = "https://github.com/medivh-project/medivh"
+                licenses{
+                    license{
+                        name = "GPL-3.0 license"
+                        url = "https://www.gnu.org/licenses/gpl-3.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "id"
+                        name = "name"
+                        email = "email"
+                    }
+                }
+                scm {
+                    connection = "scm:git:"
+                    url = "https://github.com/medivh-project/medivh"
+                }
+            }
+        }
+    }
+}
+----
+
+
+
+'''
+
+=== image:./../images/medivh-icon.svg[] ``Maven-Publish`` 配置 
+
+和Maven-Publish配置非常类似
+
+[source,kotlin]
+----
+medivhPublisher{
+    groupId = project.group.toString()
+    artifactId = project.name
+    version = project.version.toString()
+    pom{
+        name = "medivh-api"
+        description = "medivh plugin api"
+        url = "https://github.com/medivh-project/medivh"
+        licenses{
+            license{
+                name = "GPL-3.0 license"
+                url = "https://www.gnu.org/licenses/gpl-3.0.txt"
+            }
+        }
+        developers {
+            developer {
+                id = "id"
+                name = "name"
+                email = "email"
+            }
+        }
+        scm {
+            connection = "scm:git:"
+            url = "https://github.com/medivh-project/medivh"
+        }
+    }
+}
+----
+
+
+> Medivh-Publish保证你无论怎么配置都不会出错，因为Medivh-Publish会帮你填充默认值，但仍建议你检查自己的配置是否有遗漏。
+
+=== 配置详情
+
 在Sonatype的 link:https://central.sonatype.org/publish/requirements[官方文档]中，要求发布的Pom Xml中需要含有如下配置：
+
+配置的填充颗粒度到每一个属性配置。举个例子：
+
+scm信息需要包含 `connection` 和 `url` 两个属性，你配置了 `connection` 但是没有配置 `url`，Medivh-Publish仍然会帮你填充另一个属性。
+
+> 如果你手动配置了这些参数，即使这些内容是空的，Medivh-Publish会使用你的配置不会覆盖默认值，除非设置了 null，因为在 Maven 中这是非法的。
 
 
 |===
@@ -28,12 +131,15 @@ Medivh-Publish封装了Gradle官方的link:https://docs.gradle.org/current/userg
 |link:https://central.sonatype.org/publish/requirements/#provide-files-checksums[校验和签名] |是 | 用于文件校验，后文会详细说明
 |link:https://central.sonatype.org/publish/requirements/#correct-coordinates[正确的坐标] |是 | 上传工件的唯一标识 "com.example:my-library:1.0.0"
 |link:https://central.sonatype.org/publish/requirements/#project-name-description-and-url[项目信息] |是 | 包含name,description,url三个属性
-|link:https://central.sonatype.org/publish/requirements/#license-information[开源协议] |是 | 
+|link:https://central.sonatype.org/publish/requirements/#license-information[开源协议] |是 |
+|link:https://central.sonatype.org/publish/requirements/#developer-information[开发者信息] |是 |
 |link:https://central.sonatype.org/publish/requirements/#scm-information[scm信息] |是 | 关于版本控制的信息
 |===
 
-=== 1.1 源码和文档
-``Medivh-Publish``默认会增加源码和文档的上传，如果你不需要可以在build.gradle配置关闭：
+
+==== 1 源码和文档
+
+``Medivh-Publish``默认会增加源码和文档的上传，如果你不需要可以在build.gradle配置：
 
 [source,kotlin]
 ----
@@ -53,13 +159,16 @@ java {
 }
 ----
 
-=== 1.2 校验和签名
+==== 2 校验和签名
 
 此配置的目的得到Maven所需的签名文件
 
 Medivh-Publish 封装了Gradle官方的 link:https://docs.gradle.org/current/userguide/signing_plugin.html#signing_plugin[signing] 插件实现这个功能，一般来说不用特殊配置
 
-=== 1.3 正确的坐标
+
+
+
+==== 3 正确的坐标
 此配置最终是用户在引用你的库时需要的坐标，例如： ``com.example:my-library:1.0.0``
 
 Medivh-Publish 默认的配置是
@@ -71,16 +180,48 @@ Medivh-Publish 默认的配置是
 ``version = project.version``  
 
 
-=== 1.4 项目信息 
+==== 4 项目信息 
 
 项目信息包含name,description,url三个属性
 
 Medivh-Publish默认会把
+
 `name = project.name`
+
 `description = project.description`
 
+Medivh-Publish会获取项目的 git远程仓库地址作为url的值,否则会填空字符
 
-== maven-publish 插件
+`url =  gitRemoteUrl or empty`
+
+
+==== 5 开源协议
+
+Medivh-Publish默认设置一个空的开源协议
+
+
+==== 6 开发者信息
+
+Medivh-Publish 默认会获取git仓库的开发者信息
+
+name 默认是 `git config user.name`
+
+email 默认是 `git config user.email`
+
+id 默认是 `git config user.name`
+
+==== 7 SCM信息
+
+SCM 有两个信息 `connection` 和 `url`
+
+Medivh-Publish 会获取git仓库信息
+
+connection 默认是 `scm:git:remoteUrl`
+
+url 默认是 `remoteUrl`
+
+如果没有设置 git远程仓库，会填入空字符串
+
 
 
 

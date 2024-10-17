@@ -2,6 +2,7 @@ package tech.medivh.plugin.gradle.publisher
 
 import org.eclipse.jgit.api.Git
 import org.gradle.api.Project
+import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPublication
 import tech.medivh.plugin.gradle.publisher.setting.Developer
@@ -77,6 +78,46 @@ class MedivhGenerator(private val project: Project) {
                 "can't detect developer info, please specify"
             }
             return Developer(name, email)
+        }
+    }
+
+    fun generateMedivhMavenPublication() {
+        val publications = project.extensions.getByType(PublishingExtension::class.java).publications
+
+        val userMaven = publications.withType(MavenPublication::class.java).firstOrNull()
+
+        publications.create(extension.publicationName, MavenPublication::class.java) { mavenPublication ->
+            extension.pom?.run {
+                execute(mavenPublication.pom)
+            }
+            mergePom(mavenPublication.pom, userMaven?.pom)
+            mavenPublication.apply {
+                from(project.components.getByName("java"))
+                groupId = userMaven?.groupId ?: extension.groupId
+                artifactId = userMaven?.artifactId ?: extension.artifactId
+                version = userMaven?.version ?: extension.version
+            }
+
+        }
+    }
+
+    private fun mergePom(medivhPom: MavenPom, userPom: MavenPom?) {
+
+        medivhPom.licenses {
+            it.license {
+            }
+        }
+        medivhPom.developers {
+            
+        }
+        medivhPom.developers {
+            it.developer { setDev ->
+                detectDeveloper().setting(setDev)
+            }
+        }
+
+        userPom?.name?.run {
+            medivhPom.name.set(this)
         }
     }
 

@@ -1,6 +1,8 @@
 package tech.medivh.plugin.gradle.publisher
 
+import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.publish.maven.MavenPom
 import javax.inject.Inject
 
 
@@ -8,6 +10,20 @@ import javax.inject.Inject
  * @author gxz gongxuanzhangmelt@gmail.com
  **/
 open class MedivhPublisherExtension @Inject constructor(val project: Project) {
+
+    val tempPublicationName = "MedivhMavenJavaTemp"
+
+    val publicationName = "medivhMavenJava"
+
+    val repositoriesMavenName = "medivh_sonatype"
+
+    val cleanTaskName = "cleanBuildMedivhMavenRepo"
+
+    val taskGroup = "medivh-publish"
+    
+    val uploadTaskName = "uploadToSonatype"
+    
+    val generateTaskName = "generateMedivhPublication"
 
     lateinit var buildMavenRepo: String
 
@@ -17,15 +33,17 @@ open class MedivhPublisherExtension @Inject constructor(val project: Project) {
 
     var hasSources = true
 
+    var pom: Action<MavenPom>? = null
+
     lateinit var sonatypeUsername: String
 
     lateinit var sonatypePassword: String
 
-    lateinit var groupId: String
+    var groupId: String? = null
 
-    lateinit var artifactId: String
+    var artifactId: String? = null
 
-    lateinit var version: String
+    var version: String? = null
 
     internal fun fillAfterEvaluate() {
         if (!::buildMavenRepo.isInitialized) {
@@ -34,13 +52,13 @@ open class MedivhPublisherExtension @Inject constructor(val project: Project) {
         if (!::uploadMavenRepo.isInitialized) {
             uploadMavenRepo = project.layout.buildDirectory.dir("sonatypeUpload").get().asFile.absolutePath
         }
-        if (!::groupId.isInitialized) {
+        if (this.groupId == null) {
             groupId = project.group.toString()
         }
-        if (!::artifactId.isInitialized) {
+        if (this.artifactId == null) {
             artifactId = project.name
         }
-        if (!::version.isInitialized) {
+        if (this.version == null) {
             version = project.version.toString()
         }
         if (!::sonatypeUsername.isInitialized) {
@@ -59,6 +77,10 @@ open class MedivhPublisherExtension @Inject constructor(val project: Project) {
 
     fun withoutSourcesJar() {
         hasSources = false
+    }
+
+    fun pom(pomAction: Action<MavenPom>) {
+        this.pom = pomAction
     }
 
 }
