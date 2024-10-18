@@ -13,7 +13,7 @@ open class MedivhPublisherExtension @Inject constructor(val project: Project) {
 
     val tempPublicationName = "MedivhMavenJavaTemp"
 
-    val publicationName = "medivhMavenJava"
+    val publicationName = "MedivhMavenJava"
 
     val repositoriesMavenName = "medivh_sonatype"
 

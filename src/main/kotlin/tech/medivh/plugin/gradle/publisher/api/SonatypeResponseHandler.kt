@@ -1,6 +1,6 @@
 package tech.medivh.plugin.gradle.publisher.api
 
-import com.alibaba.fastjson2.JSONObject
+import com.fasterxml.jackson.databind.ObjectMapper
 import okhttp3.Response
 
 
@@ -63,8 +63,9 @@ object StatusResponseHandler : DefaultSonatypeResponseHandler<DeploymentState>()
     }
 
     override fun handleSuccess(response: Response): DeploymentState {
-        JSONObject.parseObject(response.body!!.string()).let {
-            return DeploymentState.valueOf(it.getString("deploymentState"))
+        val objectMapper = ObjectMapper()
+        objectMapper.readTree(response.body!!.toString()).let {
+            return DeploymentState.valueOf(it["deploymentState"].asText())
         }
     }
 

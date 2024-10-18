@@ -11,14 +11,14 @@ import java.util.zip.ZipOutputStream
  * @author gxz gongxuanzhangmelt@gmail.com
  **/
 
+const val sonatypeGuideDoc = "https://github.com/medivh-project/medivh-publisher/blob/main/doc/en/sonatype_guide.adoc"
 
 /**
  * see https://central.sonatype.org/publish/publish-portal-api/
  */
 fun calcAuthToken(tokenUsername: String?, tokenPassword: String?): String {
-    //  todo 
-    tokenUsername ?: throw IllegalStateException("username is null https://central.sonatype.com/account")
-    tokenPassword ?: throw IllegalStateException("password is null")
+    tokenUsername ?: throw IllegalStateException("username is null,please see $sonatypeGuideDoc")
+    tokenPassword ?: throw IllegalStateException("password is null,please see $sonatypeGuideDoc")
     return Base64.getEncoder().encodeToString("$tokenUsername:$tokenPassword".toByteArray())
 }
 
@@ -50,7 +50,5 @@ fun zipFolder(folder: File, targetFile: File): File {
     }
     return targetFile
 }
-
-
 
 

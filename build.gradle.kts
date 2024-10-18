@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "tech.medivh"
-version = "0.0.1"
+version = "0.0.2"
 
 repositories {
     mavenLocal()
@@ -16,7 +16,8 @@ repositories {
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r")
-    implementation("com.alibaba.fastjson2:fastjson2:2.0.53")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.2")
     testImplementation(kotlin("test"))
 }
 
