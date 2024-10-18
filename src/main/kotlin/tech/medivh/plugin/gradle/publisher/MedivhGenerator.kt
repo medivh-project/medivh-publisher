@@ -1,20 +1,13 @@
 package tech.medivh.plugin.gradle.publisher
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 import org.eclipse.jgit.api.Git
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPom
-import org.gradle.api.publish.maven.MavenPomDeveloperSpec
-import org.gradle.api.publish.maven.MavenPomLicenseSpec
-import org.gradle.api.publish.maven.MavenPomScm
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.publish.maven.internal.publication.MavenPomInternal
+import org.gradle.api.publish.maven.internal.publication.DefaultMavenPom
 import tech.medivh.plugin.gradle.publisher.setting.Developer
-import tech.medivh.plugin.gradle.publisher.setting.Pom
-import tech.medivh.plugin.gradle.publisher.setting.Scm
 
 
 /**
@@ -40,133 +33,44 @@ class MedivhGenerator(private val project: Project) {
         publications.create(extension.publicationName, MavenPublication::class.java) { mavenPublication ->
             mavenPublication.apply {
                 from(project.components.getByName("java"))
-                groupId = userMaven?.groupId ?: extension.groupId
-                artifactId = userMaven?.artifactId ?: extension.artifactId
-                version = userMaven?.version ?: extension.version
-                pom {
-                    aggregatePom(it)
-                }
+                groupId = extension.groupId ?: userMaven?.groupId
+                artifactId = extension.artifactId ?: userMaven?.artifactId
+                version = extension.version ?: userMaven?.version
+                extension.pom?.run { execute(pom) }
             }
-            println("generate medivh maven publication")
+            checkAndFill(mavenPublication, userMaven?.pom)
         }
     }
 
-    private fun aggregatePom(mavenPom: MavenPom) {
-        println(mavenPom::class.java)
-        println("----------------------")
-        println(mavenPom is MavenPomInternal)
-        val mapper = XmlMapper()
-        val userPom = project.userMavenPublication?.pomXml()?.let {
-            println(it.path)
-            if (!it.exists()) {
-                return@let null
-            }
-            mapper.readValue<Pom>(it)
-        }
-        println(project.medivhTempPublication.pomXml().path)
-        val medivhTempPom = mapper.readValue<Pom>(project.medivhTempPublication.pomXml())
-        mavenPom.licenses {
-            fillLicense(it, userPom, medivhTempPom)
-        }
-        mavenPom.developers {
-            fillDeveloper(it, userPom, medivhTempPom)
-        }
-        mavenPom.scm {
-            fillScm(it, userPom, medivhTempPom)
-        }
+    private fun checkAndFill(mavenPublication: MavenPublication, userMaven: MavenPom?) {
+        val mavenPom = mavenPublication.pom
+        check(mavenPom is DefaultMavenPom) { "userMaven is not DefaultMavenPom" }
+        fillLicense(mavenPom, userMaven)
     }
 
-    private fun fillLicense(licenses: MavenPomLicenseSpec, userPom: Pom?, medivhPom: Pom) {
-        medivhPom.licenses?.run {
-            forEach { license ->
+
+    private fun fillLicense(pom: DefaultMavenPom, userPom: MavenPom?) {
+        if (!pom.licenses.isNullOrEmpty()) {
+            return
+        }
+        if (userPom == null || (userPom as DefaultMavenPom).licenses.isNullOrEmpty()) {
+            pom.licenses { licenses ->
                 licenses.license {
-                    it.name.set(license.name)
-                    it.url.set(license.url)
+                    it.name.set("")
+                    it.url.set("")
                 }
             }
             return
         }
-        userPom?.licenses?.run {
-            forEach { license ->
+        userPom.licenses.forEach { userLicense ->
+            pom.licenses { licenses ->
                 licenses.license {
-                    it.name.set(license.name)
-                    it.url.set(license.url)
+                    it.name.set(userLicense.name)
+                    it.url.set(userLicense.url)
                 }
             }
-            return
-        }
-        licenses.license {
-            it.name.set("")
-            it.url.set("")
         }
     }
-
-    private fun fillDeveloper(developers: MavenPomDeveloperSpec, userPom: Pom?, medivhTempPom: Pom) {
-        userPom?.developers?.run {
-            forEach { developer ->
-                developers.developer {
-                    it.id.set(developer.id)
-                    it.name.set(developer.name)
-                    it.email.set(developer.email)
-                }
-            }
-            return
-        }
-        medivhTempPom.developers?.run {
-            forEach { developer ->
-                developers.developer {
-                    it.id.set(developer.id)
-                    it.name.set(developer.name)
-                    it.email.set(developer.email)
-                }
-            }
-            return
-        }
-        val developer = detectDeveloper()
-        developers.developer {
-            it.id.set(developer.id)
-            it.name.set(developer.name)
-            it.email.set(developer.email)
-        }
-    }
-
-    private fun fillScm(scm: MavenPomScm, userPom: Pom?, medivhTempPom: Pom) {
-        userPom?.scm?.run {
-            this.setting(scm)
-            return
-        }
-        medivhTempPom.scm?.run {
-            this.setting(scm)
-            return
-        }
-        val remoteUrl = detectRemoteUrl()
-        val scm = Scm()
-        scm.connection = "scm:git:$remoteUrl"
-        scm.url = remoteUrl
-    }
-
-
-    //    private fun generatePom(pom: MavenPom, publication: MavenPublication) {
-    //        pom.licenses { licenses ->
-    //            //  todo detect license
-    //            licenses.license {
-    //                it.name.set("GPL-3.0 license")
-    //                it.url.set("https://www.gnu.org/licenses/gpl-3.0.txt")
-    //            }
-    //        }
-    //        pom.developers {
-    //            it.developer { setDev ->
-    //                detectDeveloper().setting(setDev)
-    //            }
-    //        }
-    //        val remoteUrl = detectRemoteUrl()
-    //        pom.scm {
-    //            Scm(remoteUrl).setting(it)
-    //        }
-    //        pom.name.set("${publication.groupId}:${publication.artifactId}")
-    //        pom.description.set("a project for ${publication.artifactId}")
-    //        pom.url.set(remoteUrl)
-    //    }
 
 
     private fun detectRemoteUrl(): String? {
