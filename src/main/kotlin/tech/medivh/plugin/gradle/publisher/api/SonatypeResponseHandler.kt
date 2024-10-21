@@ -64,7 +64,7 @@ object StatusResponseHandler : DefaultSonatypeResponseHandler<DeploymentState>()
 
     override fun handleSuccess(response: Response): DeploymentState {
         val objectMapper = ObjectMapper()
-        objectMapper.readTree(response.body!!.toString()).let {
+        objectMapper.readTree(response.body!!.string()).let {
             return DeploymentState.valueOf(it["deploymentState"].asText())
         }
     }

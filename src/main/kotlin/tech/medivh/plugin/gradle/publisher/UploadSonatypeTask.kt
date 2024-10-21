@@ -19,9 +19,10 @@ open class UploadSonatypeTask @Inject constructor(@Input val medivh: MedivhPubli
         val uploadDir = File(medivh.uploadMavenRepo)
         val uploadFile = File(uploadDir, "upload.zip")
         zipFolder(mavenBuildDir, uploadFile)
-        val deploymentId = SonatypeApi.upload(uploadFile, medivh.artifactId!!)
+        val deploymentId = SonatypeApi.upload(uploadFile, medivh.finalUploadName)
         project.extensions.extraProperties["deploymentId"] = deploymentId
-        println("upload success, deploymentId=$deploymentId , deploymentState=${SonatypeApi.deploymentState(deploymentId)}")
+        println("upload success, deploymentId=$deploymentId , deploymentState=${SonatypeApi.deploymentState(deploymentId)}," +
+                " you can see https://central.sonatype.com/publishing/deployments check the status")
     }
 
 }

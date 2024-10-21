@@ -11,19 +11,16 @@ import javax.inject.Inject
  **/
 open class MedivhPublisherExtension @Inject constructor(val project: Project) {
 
-    val tempPublicationName = "MedivhMavenJavaTemp"
 
-    val publicationName = "MedivhMavenJava"
-
-    val repositoriesMavenName = "medivh_sonatype"
+    val repositoriesMavenName = "medivhSonatype"
 
     val cleanTaskName = "cleanBuildMedivhMavenRepo"
 
     val taskGroup = "medivh-publish"
-    
+
+    val publicationName = "MedivhMavenJava"
+
     val uploadTaskName = "uploadToSonatype"
-    
-    val generateTaskName = "generateMedivhPublication"
 
     lateinit var buildMavenRepo: String
 
@@ -39,6 +36,8 @@ open class MedivhPublisherExtension @Inject constructor(val project: Project) {
 
     lateinit var sonatypePassword: String
 
+    internal lateinit var finalUploadName: String
+
     var groupId: String? = null
 
     var artifactId: String? = null
@@ -51,15 +50,6 @@ open class MedivhPublisherExtension @Inject constructor(val project: Project) {
         }
         if (!::uploadMavenRepo.isInitialized) {
             uploadMavenRepo = project.layout.buildDirectory.dir("sonatypeUpload").get().asFile.absolutePath
-        }
-        if (this.groupId == null) {
-            groupId = project.group.toString()
-        }
-        if (this.artifactId == null) {
-            artifactId = project.name
-        }
-        if (this.version == null) {
-            version = project.version.toString()
         }
         if (!::sonatypeUsername.isInitialized) {
             sonatypeUsername = project.findProperty("sonatypeUsername")?.toString()

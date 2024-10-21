@@ -5,7 +5,6 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.plugins.signing.SigningExtension
@@ -20,8 +19,6 @@ class MedivhPublisher : Plugin<Project> {
 
     override fun apply(project: Project) {
         project.run {
-            dependencies.add("implementation", "com.squareup.okhttp3:okhttp:4.12.0")
-            dependencies.add("implementation", "org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r")
             val medivhExt = extensions.create("medivhPublisher", MedivhPublisherExtension::class.java, project)
             afterEvaluate {
                 gradleProject = project
@@ -35,16 +32,19 @@ class MedivhPublisher : Plugin<Project> {
                 setJavaDocAndSources(project, medivhExt)
 
                 registerCleanTask(project, medivhExt)
-                
+
                 generateMavenPublication(project)
 
-                createTempPublication(project, medivhExt)
+                generateSigningIfNecessary(project)
 
                 registerUploadTask(project, medivhExt)
 
                 tasks.register("publishDeployment", PublishDeploymentTask::class.java).configure {
-                    group = medivhExt.taskGroup
+                    it.group = medivhExt.taskGroup
                     it.dependsOn(medivhExt.uploadTaskName)
+                    it.doLast{
+                        SonatypeApi.publish(project.extensions.extraProperties["deploymentId"] as String)
+                    }
                 }
             }
         }
@@ -55,21 +55,11 @@ class MedivhPublisher : Plugin<Project> {
         generator.generateMedivhMavenPublication()
     }
 
-    private fun createTempPublication(project: Project, medivhExt: MedivhPublisherExtension) {
-        val publications = project.extensions.getByType(PublishingExtension::class.java).publications
-        publications.create(medivhExt.tempPublicationName, MavenPublication::class.java) {
-            medivhExt.pom?.execute(it.pom)
-        }
-    }
-
     private fun registerUploadTask(project: Project, medivhExt: MedivhPublisherExtension) {
         project.tasks.register(medivhExt.uploadTaskName, UploadSonatypeTask::class.java, medivhExt).configure {
             it.group = medivhExt.taskGroup
-            it.dependsOn(medivhExt.generateTaskName)
-//            it.dependsOn("publish${medivhExt.publicationName.uppercaseFirstChar()}To${medivhExt.repositoriesMavenName.uppercaseFirstChar()}Repository")
-            it.doLast {
-                println("upload!!!!!")
-            }
+            it.dependsOn(medivhExt.cleanTaskName)
+            it.dependsOn("publish${medivhExt.publicationName.uppercaseFirstChar()}PublicationTo${medivhExt.repositoriesMavenName.uppercaseFirstChar()}Repository")
         }
     }
 
@@ -116,14 +106,10 @@ class MedivhPublisher : Plugin<Project> {
     }
 
     private fun generateSigningIfNecessary(project: Project) {
-        if (!project.plugins.hasPlugin(SigningPlugin::class.java)) {
-            project.plugins.apply(SigningPlugin::class.java)
-        }
         project.extensions.configure(SigningExtension::class.java) { signing ->
             val publishing = project.extensions.getByType(PublishingExtension::class.java)
-            publishing.publications.forEach {
-                signing.sign(it)
-            }
+            val medivhPublication = publishing.publications.getByName(project.medivhPublisherExtension.publicationName)
+            signing.sign(medivhPublication)
         }
     }
 
