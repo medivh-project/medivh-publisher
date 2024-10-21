@@ -47,7 +47,7 @@ plugins {
 
 [source,shell]
 ----
-./gradlew publishDeployment
+./gradlew uploadToSonatype
 ----
 
 😺 没错，你甚至不需要任何配置。

@@ -49,7 +49,7 @@ Open your terminal and execute:
 
 [source,shell]
 ----
-./gradlew publishDeployment
+./gradlew uploadToSonatype
 ----
 
 😺 Exactly, you don’t even need any configuration.
