@@ -173,7 +173,7 @@ Default configuration value in Medivh-Publish:
 
 Contains three attributes: ``name``, ``description``, ``url``
 
-Medivh-Publish默认会把
+Medivh-Publish default value:
 
 `name = project.name`
 
