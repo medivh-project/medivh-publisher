@@ -3,13 +3,16 @@ package tech.medivh.plugin.gradle.publisher
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 import tech.medivh.plugin.gradle.publisher.api.SonatypeApi
+import tech.medivh.plugin.gradle.publisher.process.AndroidProcessFlow
+import tech.medivh.plugin.gradle.publisher.process.JavaProcessFlow
+import tech.medivh.plugin.gradle.publisher.process.ProcessFlow
 
 
 /**
@@ -27,22 +30,32 @@ class MedivhPublisher : Plugin<Project> {
 
                 applyRequiredPlugins(project)
 
+                val processFlow = selectProcessFlow(project)
+
+                processFlow.fillDefaultValues(medivhExt)
+
                 setMedivhMavenRepo(project, medivhExt)
 
-                setJavaDocAndSources(project, medivhExt)
+                processFlow.setDocAndSources(project, medivhExt)
 
                 registerCleanTask(project, medivhExt)
 
-                generateMavenPublication(project)
+                generateMavenPublication(project, processFlow)
 
                 generateSigningIfNecessary(project)
 
                 registerUploadTask(project, medivhExt)
 
+                processFlow.signDependsOn().forEach { taskName ->
+                    tasks.named("sign${medivhExt.publicationName.uppercaseFirstChar()}Publication").configure {
+                        it.dependsOn(taskName)
+                    }
+                }
+
                 tasks.register("publishDeployment", PublishDeploymentTask::class.java).configure {
                     it.group = medivhExt.taskGroup
                     it.dependsOn(medivhExt.uploadTaskName)
-                    it.doLast{
+                    it.doLast {
                         SonatypeApi.publish(project.extensions.extraProperties["deploymentId"] as String)
                     }
                 }
@@ -50,16 +63,27 @@ class MedivhPublisher : Plugin<Project> {
         }
     }
 
-    private fun generateMavenPublication(project: Project) {
-        val generator = MedivhGenerator(project)
-        generator.generateMedivhMavenPublication()
+    private fun selectProcessFlow(project: Project): ProcessFlow {
+        if (project.plugins.hasPlugin("android-library")) {
+            return AndroidProcessFlow()
+        }
+        if (project.plugins.hasPlugin(JavaBasePlugin::class.java)) {
+            return JavaProcessFlow()
+        }
+        throw IllegalStateException("Unsupported plugin")
+    }
+
+
+    private fun generateMavenPublication(project: Project, processFlow: ProcessFlow) {
+        val generator = MedivhGenerator(project, processFlow)
+        generator.generateMavenPublication()
     }
 
     private fun registerUploadTask(project: Project, medivhExt: MedivhPublisherExtension) {
-        project.tasks.register(medivhExt.uploadTaskName, UploadSonatypeTask::class.java, medivhExt).configure {
-            it.group = medivhExt.taskGroup
-            it.dependsOn(medivhExt.cleanTaskName)
-            it.dependsOn("publish${medivhExt.publicationName.uppercaseFirstChar()}PublicationTo${medivhExt.repositoriesMavenName.uppercaseFirstChar()}Repository")
+        project.tasks.register(medivhExt.uploadTaskName, UploadSonatypeTask::class.java, medivhExt).configure { task ->
+            task.group = medivhExt.taskGroup
+            task.dependsOn(medivhExt.cleanTaskName)
+            task.dependsOn("publish${medivhExt.publicationName.uppercaseFirstChar()}PublicationTo${medivhExt.repositoriesMavenName.uppercaseFirstChar()}Repository")
         }
     }
 
@@ -76,19 +100,7 @@ class MedivhPublisher : Plugin<Project> {
         }
     }
 
-    private fun setJavaDocAndSources(project: Project, medivhExt: MedivhPublisherExtension) {
-        project.extensions.getByType(JavaPluginExtension::class.java).apply {
-            if (medivhExt.hasJavaDoc) {
-                withJavadocJar()
-            }
-            if (medivhExt.hasSources) {
-                withSourcesJar()
-            }
-        }
-    }
-
     private fun setMedivhMavenRepo(project: Project, medivhExtension: MedivhPublisherExtension) {
-
         project.extensions.configure(PublishingExtension::class.java) {
             it.repositories.maven { maven ->
                 maven.name = medivhExtension.repositoriesMavenName

@@ -11,14 +11,13 @@ import javax.inject.Inject
  **/
 open class MedivhPublisherExtension @Inject constructor(val project: Project) {
 
-
     val repositoriesMavenName = "medivhSonatype"
 
     val cleanTaskName = "cleanBuildMedivhMavenRepo"
 
     val taskGroup = "medivh-publish"
 
-    val publicationName = "MedivhMavenJava"
+    var publicationName = "MedivhMavenJava"
 
     val uploadTaskName = "uploadToSonatype"
 

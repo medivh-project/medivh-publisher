@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "tech.medivh"
-version = "1.0.0"
+version = "1.2.0"
 
 repositories {
     mavenLocal()
@@ -28,7 +28,6 @@ tasks.test {
 kotlin {
     jvmToolchain(17)
 }
-
 
 gradlePlugin {
     website = "https://medivh.tech"

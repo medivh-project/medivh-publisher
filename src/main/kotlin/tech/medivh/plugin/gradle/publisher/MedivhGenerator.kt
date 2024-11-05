@@ -6,6 +6,7 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.internal.publication.DefaultMavenPom
+import tech.medivh.plugin.gradle.publisher.process.ProcessFlow
 import tech.medivh.plugin.gradle.publisher.setting.Developer
 
 
@@ -14,7 +15,7 @@ import tech.medivh.plugin.gradle.publisher.setting.Developer
  * generate or fill info.
  * @author gxz gongxuanzhangmelt@gmail.com
  **/
-class MedivhGenerator(private val project: Project) {
+class MedivhGenerator(private val project: Project, private val processFlow: ProcessFlow) {
 
     private val extension = project.extensions.getByType(MedivhPublisherExtension::class.java)
 
@@ -27,15 +28,15 @@ class MedivhGenerator(private val project: Project) {
         }
     }
 
-    fun generateMedivhMavenPublication() {
+    fun generateMavenPublication() {
         val publications = project.extensions.getByType(PublishingExtension::class.java).publications
         val userMaven = project.userMavenPublication
         publications.create(extension.publicationName, MavenPublication::class.java) { mavenPublication ->
             mavenPublication.apply {
-                from(project.components.getByName("java"))
+                processFlow.setArtifacts(this, project)
                 groupId = extension.groupId ?: userMaven?.groupId
                 if (groupId == null) {
-                    groupId = project.group.toString()
+                    groupId = processFlow.defaultGroupId(mavenPublication, project)
                 }
                 artifactId = extension.artifactId ?: userMaven?.artifactId
                 if (artifactId == null) {
@@ -51,6 +52,7 @@ class MedivhGenerator(private val project: Project) {
             checkAndFill(mavenPublication, userMaven?.pom)
         }
     }
+
 
     private fun checkAndFill(mavenPublication: MavenPublication, userMaven: MavenPom?) {
         val mavenPom = mavenPublication.pom
