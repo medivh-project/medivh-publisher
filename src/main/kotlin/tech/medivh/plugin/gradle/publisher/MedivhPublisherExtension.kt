@@ -3,6 +3,7 @@ package tech.medivh.plugin.gradle.publisher
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPom
+import org.gradle.plugins.signing.SigningExtension
 import javax.inject.Inject
 
 
@@ -70,6 +71,15 @@ open class MedivhPublisherExtension @Inject constructor(val project: Project) {
 
     fun pom(pomAction: Action<MavenPom>) {
         this.pom = pomAction
+    }
+
+    fun signing(configuration: SigningExtension.() -> Unit) {
+        project.afterEvaluate {
+            val signingExtension = project.extensions.findByName("signing") as? SigningExtension
+                ?: throw IllegalStateException("Target plugin 'signing' is not applied!")
+            signingExtension.configuration()
+        }
+
     }
 
 }

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
+
 plugins {
     kotlin("jvm") version "2.0.20"
     id("com.gradle.plugin-publish") version "1.3.0"
@@ -5,7 +7,7 @@ plugins {
 }
 
 group = "tech.medivh"
-version = "1.2.0"
+version = "1.2.1"
 
 repositories {
     mavenLocal()
@@ -14,10 +16,14 @@ repositories {
 
 
 dependencies {
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.2")
+    val versions = gradle.extraProperties["versions"] as java.util.Properties
+    val jacksonVersion: String by versions
+    val okhttpVersion: String by versions
+    val jgitVersion: String by versions
+    implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:${jgitVersion}")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}")
     testImplementation(kotlin("test"))
 }
 
@@ -25,10 +31,12 @@ tasks.test {
     useJUnitPlatform()
 }
 
+
 kotlin {
     jvmToolchain(17)
 }
 
+@Suppress("UnstableApiUsage")
 gradlePlugin {
     website = "https://medivh.tech"
     vcsUrl = "https://github.com/medivh-project/medivh-publisher.git"
