@@ -20,7 +20,7 @@ link:./doc/en/sonatype_guide.adoc[Sonatype Account Guide] | link:./doc/en/gpg_gu
 
 == Quick Start
 
-⚠️ Check the requirements before proceeding. 
+⚠️ Check the requirements before proceeding.
 
 ----
 Please ensure that you have the required configurations before proceeding. This means that you can get five attributes from gradle.
@@ -31,13 +31,13 @@ Please ensure that you have the required configurations before proceeding. This 
 - sonatypePassword
 ----
 
-=== Use 
+=== Use
 In your ``build.gradle.kts`` file, add the following code:
 
 [source,kotlin]
 ----
 plugins {
-    id("tech.medivh.plugin.publisher") version "1.0.0"
+    id("tech.medivh.plugin.publisher") version "1.2.1"
     // other plugin ...
 }
 ----

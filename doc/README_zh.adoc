@@ -30,13 +30,13 @@ link:./zh/sonatype_guide.adoc[Sonatype 账号指南] | link:./zh/gpg_guide.adoc[
 - sonatypePassword
 ----
 
-=== 使用 
+=== 使用
 在你的 ``build.gradle.kts`` 文件中，添加以下代码:
 
 [source,kotlin]
 ----
 plugins {
-    id("tech.medivh.plugin.publisher") version "1.0.0"
+    id("tech.medivh.plugin.publisher") version "1.2.1"
     // other plugin ...
 }
 ----
