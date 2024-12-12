@@ -52,12 +52,10 @@ open class MedivhPublisherExtension @Inject constructor(val project: Project) {
             uploadMavenRepo = project.layout.buildDirectory.dir("sonatypeUpload").get().asFile.absolutePath
         }
         if (!::sonatypeUsername.isInitialized) {
-            sonatypeUsername = project.findProperty("sonatypeUsername")?.toString()
-                ?: throw IllegalStateException("sonatypeUsername is null")
+            sonatypeUsername = project.findProperty("sonatypeUsername")?.toString() ?: ""
         }
         if (!::sonatypePassword.isInitialized) {
-            sonatypePassword = project.findProperty("sonatypePassword")?.toString()
-                ?: throw IllegalStateException("sonatypePassword is null")
+            sonatypePassword = project.findProperty("sonatypePassword")?.toString() ?: ""
         }
     }
 

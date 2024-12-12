@@ -1,6 +1,5 @@
 package tech.medivh.plugin.gradle.publisher.api
 
-import java.io.File
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -9,6 +8,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.internal.EMPTY_REQUEST
 import tech.medivh.plugin.gradle.publisher.MedivhPublisherExtension
+import java.io.File
 
 
 /**
@@ -17,7 +17,11 @@ import tech.medivh.plugin.gradle.publisher.MedivhPublisherExtension
  **/
 object SonatypeApi {
 
-    private lateinit var authToken: String
+    private var sonatypeUsername: String = ""
+
+    private var sonatypePassword: String = ""
+
+    private val authToken by lazy { calcAuthToken(sonatypeUsername, sonatypePassword) }
 
     //  url see https://central.sonatype.org/publish/publish-portal-api/
 
@@ -29,7 +33,8 @@ object SonatypeApi {
 
     fun init(extension: MedivhPublisherExtension) {
         extension.fillAfterEvaluate()
-        authToken = calcAuthToken(extension.sonatypeUsername, extension.sonatypePassword)
+        this.sonatypePassword = extension.sonatypePassword
+        this.sonatypeUsername = extension.sonatypeUsername
     }
 
     fun upload(file: File, name: String = file.name): String {

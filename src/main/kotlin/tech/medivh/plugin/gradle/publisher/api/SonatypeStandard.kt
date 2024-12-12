@@ -17,8 +17,8 @@ const val sonatypeGuideDoc = "https://github.com/medivh-project/medivh-publisher
  * see https://central.sonatype.org/publish/publish-portal-api/
  */
 fun calcAuthToken(tokenUsername: String?, tokenPassword: String?): String {
-    tokenUsername ?: throw IllegalStateException("username is null,please see $sonatypeGuideDoc")
-    tokenPassword ?: throw IllegalStateException("password is null,please see $sonatypeGuideDoc")
+    check(tokenUsername.isNullOrEmpty().not()) { "username is null,please see $sonatypeGuideDoc" }
+    check(tokenPassword.isNullOrEmpty().not()) { "password is null,please see $sonatypeGuideDoc" }
     return Base64.getEncoder().encodeToString("$tokenUsername:$tokenPassword".toByteArray())
 }
 
