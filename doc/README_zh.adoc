@@ -36,7 +36,7 @@ link:./zh/sonatype_guide.adoc[Sonatype 账号指南] | link:./zh/gpg_guide.adoc[
 [source,kotlin]
 ----
 plugins {
-    id("tech.medivh.plugin.publisher") version "1.2.2"
+    id("tech.medivh.plugin.publisher") version "1.2.3"
     // other plugin ...
 }
 ----
