@@ -20,17 +20,21 @@ abstract class DefaultSonatypeResponseHandler<T> : SonatypeResponseHandler<T> {
 
     var codeHandleMap = mutableMapOf<Int, (Response) -> T>().apply {
         put(400) {
-            throw IllegalStateException("Wrong authorization data (user/password or token). $seeDoc")
+            throw IllegalStateException("Wrong authorization data (user/password or token). ${errorMsgTail(it)}")
         }
         put(401) {
-            throw IllegalStateException("The user does not have an active session or is not authenticated. $seeDoc")
+            throw IllegalStateException("The user does not have an active session or is not authenticated. ${errorMsgTail(it)}")
         }
         put(403) {
-            throw IllegalStateException("The user is not authorized to perform this action.. $seeDoc")
+            throw IllegalStateException("The user is not authorized to perform this action.. ${errorMsgTail(it)}")
         }
         put(500) {
-            throw IllegalStateException("Internal server error. $seeDoc")
+            throw IllegalStateException("Internal server error. ${errorMsgTail(it)}")
         }
+    }
+
+    private fun errorMsgTail(response: Response): String {
+        return " $seeDoc\nrequest:[${response.request.url}]"
     }
 
     override fun handleResponse(response: Response): T {

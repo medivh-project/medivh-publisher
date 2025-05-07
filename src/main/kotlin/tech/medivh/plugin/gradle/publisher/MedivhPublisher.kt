@@ -55,9 +55,6 @@ class MedivhPublisher : Plugin<Project> {
                 tasks.register("publishDeployment", PublishDeploymentTask::class.java).configure {
                     it.group = medivhExt.taskGroup
                     it.dependsOn(medivhExt.uploadTaskName)
-                    it.doLast {
-                        SonatypeApi.publish(project.extensions.extraProperties["deploymentId"] as String)
-                    }
                 }
             }
         }
