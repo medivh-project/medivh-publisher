@@ -1,5 +1,7 @@
 package tech.medivh.plugin.gradle.publisher.process
 
+
+import com.android.build.gradle.LibraryExtension
 import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPublication
 import tech.medivh.plugin.gradle.publisher.MedivhPublisherExtension
@@ -20,9 +22,9 @@ class AndroidProcessFlow : ProcessFlow {
 
 
     override fun setArtifacts(mavenPublication: MavenPublication, project: Project) {
-        mavenPublication.artifact(
-            project.layout.buildDirectory.dir("outputs/aar/${project.name}-release.aar").get().asFile.path
-        )
+        project.extensions.findByType(LibraryExtension::class.java).also {
+            mavenPublication.from(project.components.getByName("release"))
+        } ?: throw IllegalStateException("Android Library Plugin not applied")
     }
 
     override fun defaultGroupId(mavenPublication: MavenPublication, project: Project): String {
