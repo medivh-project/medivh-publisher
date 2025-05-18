@@ -7,9 +7,10 @@ plugins {
 }
 
 group = "tech.medivh"
-version = "1.2.3"
+version = "1.2.4"
 
 repositories {
+    google()
     mavenLocal()
     mavenCentral()
 }
@@ -20,6 +21,8 @@ dependencies {
     val jacksonVersion: String by versions
     val okhttpVersion: String by versions
     val jgitVersion: String by versions
+    val agp: String by versions
+    implementation("com.android.tools.build:gradle:${agp}")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("org.eclipse.jgit:org.eclipse.jgit:${jgitVersion}")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}")
