@@ -56,6 +56,27 @@ plugins {
 
 image::./images/publish-complete.png[]
 
+
+
+== 常见问题
+⚠️ 如果你出现了类似于 ``Could not find com.android.tools.build:gradle``的错误，
+
+一般来说是在缺少插件依赖的仓库配置，请在``setting.gradle.kts``中添加以下代码:
+
+[source,kotlin]
+----
+pluginManagement {
+    repositories {
+        google()  // <--- 非常重要
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+----
+
+
+
+
 == 详细文档
 更高级的配置和原理请参见link:./zh/document.adoc[详细文档]
 
