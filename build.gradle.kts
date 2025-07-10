@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "tech.medivh"
-version = "1.2.5.test"
+version = "1.2.5"
 
 repositories {
     google()
