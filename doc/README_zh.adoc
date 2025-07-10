@@ -59,7 +59,7 @@ image::./images/publish-complete.png[]
 
 
 == 常见问题
-⚠️ 如果你出现了类似于 ``Could not find com.android.tools.build:gradle``的错误，
+⚠️ 如果你出现了类似于 ``Could not find com.android.tools.build:gradle``的错误。
 
 一般来说是在缺少插件依赖的仓库配置，请在``setting.gradle.kts``中添加以下代码:
 

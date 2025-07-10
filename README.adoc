@@ -61,10 +61,9 @@ image::doc/images/publish-complete.png[]
 
 
 == Frequently Questions
-If you encounter an error like Could not find com.android.tools.build:gradle,
-⚠️ If you encounter an error like ``Could not find com.android.tools.build:gradle``,
+⚠️ If you encounter an error like ``Could not find com.android.tools.build:gradle``.
 
-it’s usually due to missing repository configuration for plugin dependencies.Please add the following code to your ``settings.gradle.kts`` file:
+It’s usually due to missing repository configuration for plugin dependencies.Please add the following code to your ``settings.gradle.kts`` file:
 
 [source,kotlin]
 ----
