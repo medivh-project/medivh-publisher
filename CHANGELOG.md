@@ -4,3 +4,5 @@
 - fix issue #5
 1.2.4
 - fix issue #8
+1.2.5
+- Add repository configuration

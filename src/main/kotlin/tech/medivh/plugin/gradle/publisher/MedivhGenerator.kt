@@ -29,9 +29,9 @@ class MedivhGenerator(private val project: Project, private val processFlow: Pro
     }
 
     fun generateMavenPublication() {
-        val publications = project.extensions.getByType(PublishingExtension::class.java).publications
+        val publishingExtension = project.extensions.getByType(PublishingExtension::class.java)
         val userMaven = project.userMavenPublication
-        publications.create(extension.publicationName, MavenPublication::class.java) { mavenPublication ->
+        publishingExtension.publications.create(extension.publicationName, MavenPublication::class.java) { mavenPublication ->
             mavenPublication.apply {
                 processFlow.setArtifacts(this, project)
                 groupId = extension.groupId ?: userMaven?.groupId
@@ -50,6 +50,9 @@ class MedivhGenerator(private val project: Project, private val processFlow: Pro
                 extension.pom?.run { execute(pom) }
             }
             checkAndFill(mavenPublication, userMaven?.pom)
+        }
+        extension.repositoriesAction?.apply { 
+            execute(publishingExtension.repositories)
         }
     }
 

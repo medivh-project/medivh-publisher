@@ -2,6 +2,7 @@ package tech.medivh.plugin.gradle.publisher
 
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.publish.maven.MavenPom
 import org.gradle.plugins.signing.SigningExtension
 import javax.inject.Inject
@@ -43,6 +44,8 @@ open class MedivhPublisherExtension @Inject constructor(val project: Project) {
     var artifactId: String? = null
 
     var version: String? = null
+    
+    var repositoriesAction: Action<RepositoryHandler>? = null
 
     internal fun fillAfterEvaluate() {
         if (!::buildMavenRepo.isInitialized) {
@@ -69,6 +72,10 @@ open class MedivhPublisherExtension @Inject constructor(val project: Project) {
 
     fun pom(pomAction: Action<MavenPom>) {
         this.pom = pomAction
+    }
+    
+    fun repositories(repositoriesAction: Action<RepositoryHandler>) {
+        this.repositoriesAction = repositoriesAction
     }
 
     fun signing(configuration: SigningExtension.() -> Unit) {

@@ -37,7 +37,7 @@ In your ``build.gradle.kts`` file, add the following code:
 [source,kotlin]
 ----
 plugins {
-    id("tech.medivh.plugin.publisher") version "1.2.4"
+    id("tech.medivh.plugin.publisher") version "1.2.5"
     // other plugin ...
 }
 ----
